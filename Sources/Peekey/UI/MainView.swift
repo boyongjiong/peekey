@@ -5,21 +5,25 @@ import UniformTypeIdentifiers
 struct MainView: View {
     @EnvironmentObject private var model: AppModel
     @EnvironmentObject private var store: AccountStore
+    @EnvironmentObject private var settings: Settings
     @FocusState private var searchFocused: Bool
     @State private var dropTargeted = false
 
     var body: some View {
         VStack(spacing: 0) {
-            header
-                .padding(.horizontal, 20)
-                .padding(.top, 6)
-                .padding(.bottom, 10)
+            if !store.accounts.isEmpty {
+                searchField
+                    .padding(.horizontal, 16)
+                    .padding(.top, 2)
+                    .padding(.bottom, 8)
+            }
             content
         }
         .frame(minWidth: 320, minHeight: 360)
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background(Theme.background)
+        .onHover { model.pointerInWindow = $0 }
         .overlay(alignment: .bottom) { toast }
-        .overlay { dropOverlay }
+        .overlay { if !store.accounts.isEmpty { dropOverlay } }
         .onDrop(of: [.fileURL, .image], isTargeted: $dropTargeted) { model.handleDrop($0) }
         .sheet(item: $model.sheet) { sheet in
             switch sheet {
@@ -51,69 +55,41 @@ struct MainView: View {
         } message: {
             Text("删除后将无法再生成该账户的验证码。请确认你已在对应网站关闭两步验证或有其他备份。")
         }
-        .onChange(of: model.focusToken) { searchFocused = true }
+        .onChange(of: model.focusToken) { searchFocused = !store.accounts.isEmpty }
         .onChange(of: model.search) { model.selectedID = nil }
     }
 
-    // MARK: - Header
+    // MARK: - Search
 
-    private var header: some View {
-        HStack(spacing: 10) {
-            HStack(spacing: 6) {
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(.secondary)
-                TextField("搜索", text: $model.search)
-                    .textFieldStyle(.plain)
-                    .focused($searchFocused)
-                if !model.search.isEmpty {
-                    Button { model.search = "" } label: {
-                        Image(systemName: "xmark.circle.fill").foregroundStyle(.tertiary)
-                    }
-                    .buttonStyle(.plain)
+    private var searchField: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 13))
+                .foregroundStyle(.secondary)
+            TextField("搜索", text: $model.search)
+                .textFieldStyle(.plain)
+                .focused($searchFocused)
+                .accessibilityLabel("搜索账户")
+            if !model.search.isEmpty {
+                Button { model.search = "" } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(.tertiary)
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel("清除搜索")
             }
-            .font(.system(size: 14))
-            .padding(.horizontal, 10)
-            .padding(.vertical, 7)
-            .background(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(Color(nsColor: .textBackgroundColor))
-                    .shadow(color: .black.opacity(0.08), radius: 1, y: 1)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .strokeBorder(Color.primary.opacity(0.1))
-            )
-
-            Menu {
-                Button { model.scanScreen() } label: { Label("扫描屏幕二维码", systemImage: "qrcode.viewfinder") }
-                Button { model.importImageFile() } label: { Label("从图片导入…", systemImage: "photo") }
-                Button { model.startCamera() } label: { Label("使用摄像头扫描", systemImage: "camera") }
-                Divider()
-                Button { model.addFromClipboard() } label: { Label("从剪贴板添加（链接/图片）", systemImage: "doc.on.clipboard") }
-                Button { model.newManual() } label: { Label("手动输入…", systemImage: "keyboard") }
-            } label: {
-                Image(systemName: "plus")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(Color.accentColor)
-                    .frame(width: 30, height: 30)
-                    .background(Circle().fill(Color.accentColor.opacity(0.15)))
-            }
-            .menuStyle(.button)
-            .buttonStyle(.plain)
-            .menuIndicator(.hidden)
-            .fixedSize()
-            .help("添加账户")
-
-            Button { model.openSettings() } label: {
-                Image(systemName: "gearshape")
-                    .font(.system(size: 14))
-                    .foregroundStyle(.secondary)
-                    .frame(width: 24, height: 30)
-            }
-            .buttonStyle(.plain)
-            .help("设置")
         }
+        .font(.system(size: 14))
+        .padding(.horizontal, 10)
+        .frame(height: 32)
+        .background(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(Color.primary.opacity(0.055))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .strokeBorder(searchFocused ? Color.accentColor.opacity(0.7) : .clear, lineWidth: 1.5)
+        )
+        .animation(.easeOut(duration: 0.15), value: searchFocused)
     }
 
     // MARK: - Content
@@ -121,22 +97,27 @@ struct MainView: View {
     @ViewBuilder
     private var content: some View {
         if let error = store.loadError, store.accounts.isEmpty {
-            placeholder(icon: "exclamationmark.lock", title: "无法读取钥匙串", detail: error) {
-                Button("重试") { store.load() }
+            VStack(spacing: 10) {
+                Spacer()
+                Image(systemName: "exclamationmark.lock").font(.system(size: 40, weight: .light)).foregroundStyle(.secondary)
+                Text("无法读取钥匙串").font(.headline)
+                Text(error).font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                Button("重试") { store.load() }.padding(.top, 6)
+                Spacer()
             }
+            .padding(.horizontal, 28)
         } else if store.accounts.isEmpty {
-            placeholder(icon: "key.viewfinder", title: "还没有账户", detail: "扫描网页上的 2FA 二维码，或手动输入密钥") {
-                VStack(spacing: 8) {
-                    Button { model.scanScreen() } label: {
-                        Label("扫描屏幕二维码", systemImage: "qrcode.viewfinder").frame(width: 160)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    Button { model.newManual() } label: { Text("手动添加").frame(width: 160) }
-                }
-                .controlSize(.large)
-            }
+            EmptyStateView(dropTargeted: dropTargeted, hotKey: settings.hotKey)
         } else if model.filtered.isEmpty {
-            placeholder(icon: "magnifyingglass", title: "没有匹配“\(model.search)”的账户", detail: nil) { EmptyView() }
+            VStack(spacing: 8) {
+                Spacer()
+                Image(systemName: "magnifyingglass").font(.system(size: 32, weight: .light)).foregroundStyle(.secondary)
+                Text("没有匹配“\(model.search)”的账户").font(.headline)
+                Text("按 Esc 清除搜索").font(.subheadline).foregroundStyle(.secondary)
+                Spacer()
+                Spacer()
+            }
+            .frame(maxWidth: .infinity)
         } else {
             list
         }
@@ -146,7 +127,7 @@ struct MainView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 TimelineView(.periodic(from: .now, by: 1)) { ctx in
-                    LazyVStack(spacing: 14) {
+                    LazyVStack(spacing: 12) {
                         ForEach(model.filtered) { account in
                             AccountCard(
                                 account: account,
@@ -159,9 +140,9 @@ struct MainView: View {
                             .contextMenu { contextMenu(for: account) }
                         }
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 8)
-                    .padding(.bottom, 24)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 6)
+                    .padding(.bottom, 20)
                 }
             }
             .scrollIndicators(.never)
@@ -193,24 +174,6 @@ struct MainView: View {
         Button("删除…", role: .destructive) { model.pendingDelete = account }
     }
 
-    private func placeholder<Actions: View>(icon: String, title: String, detail: String?, @ViewBuilder actions: () -> Actions) -> some View {
-        VStack(spacing: 10) {
-            Spacer()
-            Image(systemName: icon)
-                .font(.system(size: 44, weight: .light))
-                .foregroundStyle(.tertiary)
-            Text(title).font(.headline)
-            if let detail {
-                Text(detail).font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
-            }
-            actions().padding(.top, 8)
-            Spacer()
-            Spacer()
-        }
-        .padding(.horizontal, 30)
-        .frame(maxWidth: .infinity)
-    }
-
     // MARK: - Overlays
 
     @ViewBuilder
@@ -237,5 +200,127 @@ struct MainView: View {
                 .padding(10)
                 .allowsHitTesting(false)
         }
+    }
+}
+
+/// First-run state: one obvious primary action, secondary paths as links,
+/// the whole area doubles as a visible drop zone, and the global hotkey is taught up front.
+private struct EmptyStateView: View {
+    @EnvironmentObject private var model: AppModel
+    let dropTargeted: Bool
+    let hotKey: HotKeyCombo?
+
+    var body: some View {
+        VStack(spacing: 0) {
+            VStack(spacing: 14) {
+                Spacer(minLength: 0)
+                ZStack {
+                    Circle()
+                        .fill(Color.accentColor.opacity(0.12))
+                        .frame(width: 72, height: 72)
+                    Image(systemName: dropTargeted ? "arrow.down.circle" : "qrcode.viewfinder")
+                        .font(.system(size: 30, weight: .medium))
+                        .foregroundStyle(Color.accentColor)
+                        .contentTransition(.symbolEffect(.replace))
+                }
+                VStack(spacing: 6) {
+                    Text(dropTargeted ? "松开以识别二维码" : "添加第一个验证码")
+                        .font(.system(size: 17, weight: .semibold))
+                    Text("框选网页上的 2FA 二维码即可添加")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.secondary)
+                }
+                Button { model.scanScreen() } label: {
+                    Label("扫描屏幕二维码", systemImage: "viewfinder")
+                        .frame(minWidth: 150)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .padding(.top, 4)
+
+                HStack(spacing: 6) {
+                    LinkButton("从图片导入") { model.importImageFile() }
+                    Text("·").foregroundStyle(.tertiary)
+                    LinkButton("手动输入") { model.newManual() }
+                }
+                .font(.system(size: 13))
+                Spacer(minLength: 0)
+                Text("也可以把二维码图片拖到这里")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                    .padding(.bottom, 14)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color.accentColor.opacity(dropTargeted ? 0.08 : 0))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .strokeBorder(
+                        dropTargeted ? Color.accentColor : Color.primary.opacity(0.12),
+                        style: StrokeStyle(lineWidth: dropTargeted ? 2 : 1, dash: [6, 5])
+                    )
+            )
+            .animation(.easeOut(duration: 0.15), value: dropTargeted)
+            .padding(.horizontal, 16)
+            .padding(.top, 4)
+
+            if let hotKey {
+                HStack(spacing: 6) {
+                    KeyCap(hotKey.display)
+                    Text("在任何地方唤醒 Peekey")
+                }
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
+                .frame(height: 44)
+            } else {
+                Spacer().frame(height: 16)
+            }
+        }
+    }
+}
+
+private struct LinkButton: View {
+    let title: String
+    let action: () -> Void
+    @State private var hovering = false
+
+    init(_ title: String, action: @escaping () -> Void) {
+        self.title = title
+        self.action = action
+    }
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .foregroundStyle(Color.accentColor)
+                .underline(hovering)
+        }
+        .buttonStyle(.plain)
+        .onHover { h in
+            hovering = h
+            if h { NSCursor.pointingHand.push() } else { NSCursor.pop() }
+        }
+    }
+}
+
+private struct KeyCap: View {
+    let text: String
+    init(_ text: String) { self.text = text }
+
+    var body: some View {
+        Text(text)
+            .font(.system(size: 11, weight: .medium, design: .rounded))
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(
+                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    .fill(Color.primary.opacity(0.06))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.15))
+            )
     }
 }

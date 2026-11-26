@@ -29,6 +29,13 @@ final class MainWindowController: NSWindowController, NSWindowDelegate {
                 .environmentObject(model.settings)
         )
         window.setFrameAutosaveName("PeekeyMainWindow")
+
+        let controls = NSHostingView(rootView: TitlebarControls().environmentObject(model))
+        controls.frame = NSRect(origin: .zero, size: controls.fittingSize)
+        let accessory = NSTitlebarAccessoryViewController()
+        accessory.view = controls
+        accessory.layoutAttribute = .trailing
+        window.addTitlebarAccessoryViewController(accessory)
         super.init(window: window)
         window.delegate = self
         installKeyMonitor()

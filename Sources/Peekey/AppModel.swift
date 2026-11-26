@@ -37,6 +37,8 @@ final class AppModel: ObservableObject {
     @Published var pendingDelete: Account?
     /// Bumped whenever the main window is shown so the search field grabs focus.
     @Published var focusToken = 0
+    /// Drives hover-revealed chrome (e.g. the settings gear).
+    @Published var pointerInWindow = false
 
     /// True while the screen-capture UI is up or a modal is running, so we don't auto-hide.
     var suppressAutoHide = false

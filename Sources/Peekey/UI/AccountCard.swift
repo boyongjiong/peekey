@@ -8,6 +8,7 @@ struct AccountCard: View {
     let isCopied: Bool
 
     @State private var hovering = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         let palette = Palette.palette(for: account)
@@ -23,7 +24,7 @@ struct AccountCard: View {
             if !account.displaySubtitle.isEmpty {
                 Text(account.displaySubtitle)
                     .font(.system(size: 13))
-                    .opacity(0.85)
+                    .opacity(0.92)
                     .lineLimit(1)
                     .truncationMode(.tail)
             }
@@ -67,11 +68,18 @@ struct AccountCard: View {
                     .padding(2)
             }
         }
-        .shadow(color: palette.end.opacity(hovering ? 0.5 : 0.35), radius: hovering ? 16 : 12, y: hovering ? 8 : 6)
-        .offset(y: hovering ? -2 : 0)
-        .animation(.easeOut(duration: 0.15), value: hovering)
-        .onHover { hovering = $0 }
+        .shadow(color: palette.end.opacity(hovering ? 0.45 : 0.28), radius: hovering ? 14 : 10, y: hovering ? 7 : 5)
+        .offset(y: hovering && !reduceMotion ? -2 : 0)
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.15), value: hovering)
+        .onHover { h in
+            hovering = h
+            if h { NSCursor.pointingHand.push() } else { NSCursor.pop() }
+        }
         .contentShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(account.displayTitle) \(account.displaySubtitle)，验证码 \(account.code(at: date).map(String.init).joined(separator: " "))")
+        .accessibilityHint("点击复制")
+        .accessibilityAddTraits(.isButton)
     }
 
     /// "949761" → "949 761", "12345678" → "1234 5678"
@@ -84,6 +92,7 @@ struct AccountCard: View {
 
 struct CountdownRing: View {
     let period: Int
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         TimelineView(.animation(minimumInterval: 1.0 / 20)) { ctx in
@@ -100,7 +109,7 @@ struct CountdownRing: View {
                     .rotationEffect(.degrees(-90))
             }
             .frame(width: 18, height: 18)
-            .opacity(urgent && Int(remaining * 2) % 2 == 0 ? 0.75 : 1)
+            .opacity(urgent && !reduceMotion && Int(remaining * 2) % 2 == 0 ? 0.75 : 1)
             .help("\(Int(remaining.rounded(.up))) 秒后刷新")
         }
     }

@@ -42,7 +42,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if !launchedAsLoginItem {
             DispatchQueue.main.async { [self] in
                 mainWindow.show(anchor: model.settings.displayMode.showsMenuBar ? statusItem.anchorRect : nil)
-                if model.settings.displayMode == .hidden, let hk = model.settings.hotKey {
+                if model.settings.displayMode == .hidden, !model.store.accounts.isEmpty, let hk = model.settings.hotKey {
                     model.showToast("按 \(hk.display) 随时唤醒 Peekey")
                 }
             }

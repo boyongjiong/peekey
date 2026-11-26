@@ -5,12 +5,15 @@ final class AccountStore: ObservableObject {
     @Published private(set) var accounts: [Account] = []
     @Published private(set) var loadError: String?
 
-    /// `PEEKEY_DEMO=1` → in-memory sample data, never touches the keychain (for screenshots / UI dev).
-    private let demo = ProcessInfo.processInfo.environment["PEEKEY_DEMO"] == "1"
+    /// `PEEKEY_DEMO=1` → in-memory sample data, `PEEKEY_DEMO=empty` → in-memory empty list.
+    /// Neither touches the keychain (for screenshots / UI dev).
+    private let demoMode = ProcessInfo.processInfo.environment["PEEKEY_DEMO"]
+    private var demo: Bool { demoMode == "1" || demoMode == "empty" }
 
     init() { load() }
 
     func load() {
+        if demoMode == "empty" { return }
         if demo {
             accounts = [
                 Account(issuer: "GitHub", name: "octocat@example.com", secret: "JBSWY3DPEHPK3PXP", color: "green"),
