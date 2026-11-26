@@ -23,13 +23,8 @@ ICNS="$ROOT/build/AppIcon.icns"
 if [[ ! -f "$ICNS" || scripts/make-icon.swift -nt "$ICNS" ]]; then
   echo "▸ Rendering icon…"
   TMP="$(mktemp -d)"
-  swift scripts/make-icon.swift "$TMP/icon.png" >/dev/null
   ICONSET="$TMP/AppIcon.iconset"
-  mkdir -p "$ICONSET"
-  for s in 16 32 128 256 512; do
-    sips -z $s $s "$TMP/icon.png" --out "$ICONSET/icon_${s}x${s}.png" >/dev/null
-    sips -z $((s*2)) $((s*2)) "$TMP/icon.png" --out "$ICONSET/icon_${s}x${s}@2x.png" >/dev/null
-  done
+  swift scripts/make-icon.swift "$ICONSET" >/dev/null
   iconutil -c icns "$ICONSET" -o "$ICNS"
   rm -rf "$TMP"
 fi

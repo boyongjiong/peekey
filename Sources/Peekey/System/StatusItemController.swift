@@ -12,9 +12,7 @@ final class StatusItemController: NSObject {
         if visible, item == nil {
             let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
             if let button = item.button {
-                let image = NSImage(systemSymbolName: "lock.shield", accessibilityDescription: "Peekey")
-                image?.isTemplate = true
-                button.image = image
+                button.image = MenuBarIcon.image
                 button.target = self
                 button.action = #selector(clicked(_:))
                 button.sendAction(on: [.leftMouseUp, .rightMouseUp])
