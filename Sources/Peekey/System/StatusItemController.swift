@@ -18,7 +18,7 @@ final class StatusItemController: NSObject {
                 button.target = self
                 button.action = #selector(clicked(_:))
                 button.sendAction(on: [.leftMouseUp, .rightMouseUp])
-                button.toolTip = "Peekey 瞄码"
+                button.toolTip = "Peekey"
             }
             self.item = item
         } else if !visible, let item {
@@ -41,18 +41,18 @@ final class StatusItemController: NSObject {
     private func showMenu() {
         guard let item else { return }
         let menu = NSMenu()
-        let open = NSMenuItem(title: "打开 Peekey", action: #selector(openMain), keyEquivalent: "")
-        if let hk = model.settings.hotKey { open.title = "打开 Peekey    \(hk.display)" }
+        let open = NSMenuItem(title: L("Open Peekey", "打开 Peekey"), action: #selector(openMain), keyEquivalent: "")
+        if let hk = model.settings.hotKey { open.title = L("Open Peekey    \(hk.display)", "打开 Peekey    \(hk.display)") }
         open.target = self
         menu.addItem(open)
-        let scan = NSMenuItem(title: "扫描屏幕二维码", action: #selector(scan), keyEquivalent: "")
+        let scan = NSMenuItem(title: L("Scan QR Code on Screen", "扫描屏幕二维码"), action: #selector(scan), keyEquivalent: "")
         scan.target = self
         menu.addItem(scan)
         menu.addItem(.separator())
-        let settings = NSMenuItem(title: "设置…", action: #selector(openSettings), keyEquivalent: ",")
+        let settings = NSMenuItem(title: L("Settings…", "设置…"), action: #selector(openSettings), keyEquivalent: ",")
         settings.target = self
         menu.addItem(settings)
-        menu.addItem(NSMenuItem(title: "退出 Peekey", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: L("Quit Peekey", "退出 Peekey"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         item.menu = menu
         item.button?.performClick(nil)
         item.menu = nil // restore left-click behavior

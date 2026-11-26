@@ -23,14 +23,14 @@ final class MainWindowController: NSWindowController, NSWindowDelegate {
         window.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
         window.isReleasedWhenClosed = false
         window.contentView = NSHostingView(
-            rootView: MainView()
+            rootView: LocalizedRoot { MainView() }
                 .environmentObject(model)
                 .environmentObject(model.store)
                 .environmentObject(model.settings)
         )
         window.setFrameAutosaveName("PeekeyMainWindow")
 
-        let controls = NSHostingView(rootView: TitlebarControls().environmentObject(model))
+        let controls = NSHostingView(rootView: LocalizedRoot { TitlebarControls() }.environmentObject(model).environmentObject(model.settings))
         controls.frame = NSRect(origin: .zero, size: controls.fittingSize)
         let accessory = NSTitlebarAccessoryViewController()
         accessory.view = controls

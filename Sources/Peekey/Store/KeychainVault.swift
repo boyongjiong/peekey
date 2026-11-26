@@ -10,8 +10,8 @@ enum KeychainVault {
         case status(OSStatus)
         var errorDescription: String? {
             if case .status(let s) = self {
-                let msg = SecCopyErrorMessageString(s, nil) as String? ?? "未知错误"
-                return "钥匙串错误 (\(s))：\(msg)"
+                let msg = SecCopyErrorMessageString(s, nil) as String? ?? L("Unknown error", "未知错误")
+                return L("Keychain error (\(s)): \(msg)", "钥匙串错误 (\(s))：\(msg)")
             }
             return nil
         }

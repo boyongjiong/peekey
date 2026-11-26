@@ -25,31 +25,31 @@ struct AccountForm: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(isNew ? "添加账户" : "编辑账户").font(.title3.bold())
+            Text(isNew ? L("Add Account", "添加账户") : L("Edit Account", "编辑账户")).font(.title3.bold())
 
             Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 12, verticalSpacing: 12) {
                 GridRow {
-                    Text("发行方").gridColumnAlignment(.trailing)
-                    TextField("例如 GitHub", text: $draft.issuer)
+                    Text(L("Issuer", "发行方")).gridColumnAlignment(.trailing)
+                    TextField(L("e.g. GitHub", "例如 GitHub"), text: $draft.issuer)
                 }
                 GridRow {
-                    Text("账户名")
-                    TextField("例如 me@example.com", text: $draft.name)
+                    Text(L("Account", "账户名"))
+                    TextField(L("e.g. me@example.com", "例如 me@example.com"), text: $draft.name)
                 }
                 if isNew {
                     GridRow {
-                        Text("密钥")
+                        Text(L("Secret", "密钥"))
                         VStack(alignment: .leading, spacing: 4) {
-                            TextField("Base32 密钥，如 JBSWY3DPEHPK3PXP", text: $secretInput)
+                            TextField(L("Base32 secret, e.g. JBSWY3DPEHPK3PXP", "Base32 密钥，如 JBSWY3DPEHPK3PXP"), text: $secretInput)
                                 .font(.system(.body, design: .monospaced))
                             if !secretInput.isEmpty && !secretValid {
-                                Text("密钥格式无效：只能包含 A–Z 和 2–7").font(.caption).foregroundStyle(.red)
+                                Text(L("Invalid secret: only A–Z and 2–7 are allowed", "密钥格式无效：只能包含 A–Z 和 2–7")).font(.caption).foregroundStyle(.red)
                             }
                         }
                     }
                 }
                 GridRow(alignment: .center) {
-                    Text("颜色")
+                    Text(L("Color", "颜色"))
                     HStack(spacing: 6) {
                         ForEach(Palette.all) { p in
                             let selected = Palette.palette(for: draft).key == p.key
@@ -64,21 +64,21 @@ struct AccountForm: View {
                 }
             }
 
-            DisclosureGroup("高级", isExpanded: $showAdvanced) {
+            DisclosureGroup(L("Advanced", "高级"), isExpanded: $showAdvanced) {
                 HStack(spacing: 16) {
-                    Picker("算法", selection: $draft.algorithm) {
+                    Picker(L("Algorithm", "算法"), selection: $draft.algorithm) {
                         ForEach(OTPAlgorithm.allCases, id: \.self) { Text($0.rawValue).tag($0) }
                     }
                     .fixedSize()
-                    Picker("位数", selection: $draft.digits) {
+                    Picker(L("Digits", "位数"), selection: $draft.digits) {
                         ForEach(6...8, id: \.self) { Text("\($0)").tag($0) }
                     }
                     .fixedSize()
                     HStack(spacing: 4) {
-                        Text("周期")
+                        Text(L("Period", "周期"))
                         TextField("", value: $draft.period, format: .number)
                             .frame(width: 44)
-                        Text("秒")
+                        Text(L("s", "秒"))
                     }
                 }
                 .padding(.top, 8)
@@ -86,7 +86,7 @@ struct AccountForm: View {
             }
 
             HStack {
-                Text("预览").foregroundStyle(.secondary)
+                Text(L("Preview", "预览")).foregroundStyle(.secondary)
                 if canSave {
                     TimelineView(.periodic(from: .now, by: 1)) { ctx in
                         Text(AccountCard.group(previewAccount.code(at: ctx.date)))
@@ -105,9 +105,9 @@ struct AccountForm: View {
 
             HStack {
                 Spacer()
-                Button("取消", role: .cancel) { model.sheet = nil }
+                Button(L("Cancel", "取消"), role: .cancel) { model.sheet = nil }
                     .keyboardShortcut(.cancelAction)
-                Button("保存") { save() }
+                Button(L("Save", "保存")) { save() }
                     .keyboardShortcut(.defaultAction)
                     .disabled(!canSave)
             }

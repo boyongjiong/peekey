@@ -38,7 +38,7 @@ final class AccountStore: ObservableObject {
         do {
             try KeychainVault.save(try JSONEncoder().encode(accounts))
         } catch {
-            loadError = "保存失败：\(error.localizedDescription)"
+            loadError = L("Save failed: \(error.localizedDescription)", "保存失败：\(error.localizedDescription)")
         }
     }
 

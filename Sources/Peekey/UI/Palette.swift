@@ -3,10 +3,12 @@ import SwiftUI
 
 struct CardPalette: Identifiable {
     let key: String
-    let name: String
+    let en: String
+    let zh: String
     let start: Color
     let end: Color
     var id: String { key }
+    var name: String { L(en, zh) }
     var gradient: LinearGradient {
         LinearGradient(colors: [start, end], startPoint: .topLeading, endPoint: .bottomTrailing)
     }
@@ -15,16 +17,16 @@ struct CardPalette: Identifiable {
 enum Palette {
     // Tuned so white text clears WCAG 3:1 (large/bold) at the light end and ~4.7:1+ at the dark end.
     static let all: [CardPalette] = [
-        .init(key: "green", name: "绿", start: hex(0x3FA15A), end: hex(0x25804A)),
-        .init(key: "blue", name: "蓝", start: hex(0x3D8AF0), end: hex(0x2459D0)),
-        .init(key: "purple", name: "紫", start: hex(0x8E6BF0), end: hex(0x6440D4)),
-        .init(key: "orange", name: "橙", start: hex(0xE5762B), end: hex(0xC4501C)),
-        .init(key: "pink", name: "粉", start: hex(0xE0508A), end: hex(0xBC2F6A)),
-        .init(key: "teal", name: "青", start: hex(0x13958C), end: hex(0x0B7069)),
-        .init(key: "indigo", name: "靛", start: hex(0x5D6CE8), end: hex(0x3D44C4)),
-        .init(key: "red", name: "红", start: hex(0xE0524A), end: hex(0xBA332D)),
-        .init(key: "slate", name: "灰", start: hex(0x64788F), end: hex(0x46586C)),
-        .init(key: "gold", name: "金", start: hex(0xBE8A12), end: hex(0x956A08)),
+        .init(key: "green", en: "Green", zh: "绿", start: hex(0x3FA15A), end: hex(0x25804A)),
+        .init(key: "blue", en: "Blue", zh: "蓝", start: hex(0x3D8AF0), end: hex(0x2459D0)),
+        .init(key: "purple", en: "Purple", zh: "紫", start: hex(0x8E6BF0), end: hex(0x6440D4)),
+        .init(key: "orange", en: "Orange", zh: "橙", start: hex(0xE5762B), end: hex(0xC4501C)),
+        .init(key: "pink", en: "Pink", zh: "粉", start: hex(0xE0508A), end: hex(0xBC2F6A)),
+        .init(key: "teal", en: "Teal", zh: "青", start: hex(0x13958C), end: hex(0x0B7069)),
+        .init(key: "indigo", en: "Indigo", zh: "靛", start: hex(0x5D6CE8), end: hex(0x3D44C4)),
+        .init(key: "red", en: "Red", zh: "红", start: hex(0xE0524A), end: hex(0xBA332D)),
+        .init(key: "slate", en: "Slate", zh: "灰", start: hex(0x64788F), end: hex(0x46586C)),
+        .init(key: "gold", en: "Gold", zh: "金", start: hex(0xBE8A12), end: hex(0x956A08)),
     ]
 
     static func palette(for account: Account) -> CardPalette {

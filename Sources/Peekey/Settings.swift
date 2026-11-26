@@ -8,10 +8,10 @@ enum DisplayMode: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .menuBar: return "菜单栏"
+        case .menuBar: return L("Menu bar", "菜单栏")
         case .dock: return "Dock"
-        case .both: return "菜单栏和 Dock"
-        case .hidden: return "都不显示（仅快捷键唤醒）"
+        case .both: return L("Menu bar and Dock", "菜单栏和 Dock")
+        case .hidden: return L("Neither (hotkey only)", "都不显示（仅快捷键唤醒）")
         }
     }
 
@@ -62,6 +62,12 @@ struct HotKeyCombo: Codable, Equatable {
 final class Settings: ObservableObject {
     private let defaults = UserDefaults.standard
 
+    @Published var language: AppLanguage {
+        didSet {
+            AppLanguage.current = language
+            defaults.set(language.rawValue, forKey: "language")
+        }
+    }
     @Published var displayMode: DisplayMode { didSet { defaults.set(displayMode.rawValue, forKey: "displayMode") } }
     @Published var hotKey: HotKeyCombo? {
         didSet {
@@ -80,6 +86,7 @@ final class Settings: ObservableObject {
 
     init() {
         defaults.register(defaults: [
+            "language": AppLanguage.english.rawValue,
             "displayMode": DisplayMode.menuBar.rawValue,
             "hideAfterCopy": true,
             "hideOnDeactivate": true,
@@ -87,6 +94,9 @@ final class Settings: ObservableObject {
             "clearClipboard": true,
             "clearClipboardSeconds": 60,
         ])
+        let lang = AppLanguage(rawValue: defaults.string(forKey: "language") ?? "") ?? .english
+        AppLanguage.current = lang
+        language = lang
         displayMode = DisplayMode(rawValue: defaults.string(forKey: "displayMode") ?? "") ?? .menuBar
         if let data = defaults.data(forKey: "hotKey") {
             hotKey = data.isEmpty ? nil : (try? JSONDecoder().decode(HotKeyCombo.self, from: data))

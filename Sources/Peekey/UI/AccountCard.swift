@@ -42,7 +42,7 @@ struct AccountCard: View {
         .background(palette.gradient)
         .overlay(alignment: .bottomTrailing) {
             if hovering && !isCopied {
-                Label("点击复制", systemImage: "doc.on.doc")
+                Label(L("Click to copy", "点击复制"), systemImage: "doc.on.doc")
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.white.opacity(0.85))
                     .padding(12)
@@ -53,7 +53,7 @@ struct AccountCard: View {
             if isCopied {
                 ZStack {
                     Color.black.opacity(0.18)
-                    Label("已复制", systemImage: "checkmark.circle.fill")
+                    Label(L("Copied", "已复制"), systemImage: "checkmark.circle.fill")
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundStyle(.white)
                 }
@@ -77,8 +77,8 @@ struct AccountCard: View {
         }
         .contentShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(account.displayTitle) \(account.displaySubtitle)，验证码 \(account.code(at: date).map(String.init).joined(separator: " "))")
-        .accessibilityHint("点击复制")
+        .accessibilityLabel(L("\(account.displayTitle) \(account.displaySubtitle), code \(account.code(at: date).map(String.init).joined(separator: " "))", "\(account.displayTitle) \(account.displaySubtitle)，验证码 \(account.code(at: date).map(String.init).joined(separator: " "))"))
+        .accessibilityHint(L("Click to copy", "点击复制"))
         .accessibilityAddTraits(.isButton)
     }
 
@@ -110,7 +110,7 @@ struct CountdownRing: View {
             }
             .frame(width: 18, height: 18)
             .opacity(urgent && !reduceMotion && Int(remaining * 2) % 2 == 0 ? 0.75 : 1)
-            .help("\(Int(remaining.rounded(.up))) 秒后刷新")
+            .help(L("Refreshes in \(Int(remaining.rounded(.up))) s", "\(Int(remaining.rounded(.up))) 秒后刷新"))
         }
     }
 }

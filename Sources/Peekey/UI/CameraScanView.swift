@@ -16,20 +16,20 @@ struct CameraScanView: View {
                         .frame(width: 200, height: 200)
                     if scanner.state == .starting { ProgressView().controlSize(.large) }
                 case .denied:
-                    message("没有摄像头权限", "请在 系统设置 → 隐私与安全性 → 摄像头 中允许 Peekey")
+                    message(L("No Camera Access", "没有摄像头权限"), L("Allow Peekey in System Settings → Privacy & Security → Camera", "请在 系统设置 → 隐私与安全性 → 摄像头 中允许 Peekey"))
                 case .noCamera:
-                    message("未找到摄像头", "请连接摄像头，或改用「扫描屏幕二维码」")
+                    message(L("No Camera Found", "未找到摄像头"), L("Connect a camera, or use “Scan QR Code on Screen” instead", "请连接摄像头，或改用「扫描屏幕二维码」"))
                 case .failed(let msg):
-                    message("摄像头启动失败", msg)
+                    message(L("Camera Failed to Start", "摄像头启动失败"), msg)
                 }
             }
             .frame(width: 400, height: 300)
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
 
             HStack {
-                Text("将手机上的二维码对准摄像头").foregroundStyle(.secondary)
+                Text(L("Hold the QR code on your phone up to the camera", "将手机上的二维码对准摄像头")).foregroundStyle(.secondary)
                 Spacer()
-                Button("取消") { model.sheet = nil }
+                Button(L("Cancel", "取消")) { model.sheet = nil }
                     .keyboardShortcut(.cancelAction)
             }
         }

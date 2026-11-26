@@ -34,6 +34,7 @@ if [[ ! -f "$ICNS" || scripts/make-icon.swift -nt "$ICNS" ]]; then
   rm -rf "$TMP"
 fi
 cp "$ICNS" "$APP/Contents/Resources/AppIcon.icns"
+cp -R Resources/*.lproj "$APP/Contents/Resources/"
 
 echo "▸ Signing ($SIGN_IDENTITY)…"
 codesign --force --options runtime --entitlements Resources/Peekey.entitlements --sign "$SIGN_IDENTITY" "$APP"

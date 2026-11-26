@@ -3,7 +3,12 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>zh_CN</string>
+	<string>en</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>zh-Hans</string>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>Peekey</string>
 	<key>CFBundleExecutable</key>
@@ -29,11 +34,11 @@
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Peekey 使用摄像头扫描 2FA 二维码，画面只在本机识别，不会保存或上传。</string>
+	<string>Peekey uses the camera to scan 2FA QR codes. Frames are processed on this Mac only and are never saved or uploaded.</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>
-	<string>Peekey 瞄码 — 一键唤醒，瞄一眼验证码。</string>
+	<string>Peekey — peek at your 2FA codes with one keystroke.</string>
 	<key>NSSupportsAutomaticTermination</key>
 	<false/>
 </dict>

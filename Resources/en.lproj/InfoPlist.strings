@@ -1,0 +1,2 @@
+"NSCameraUsageDescription" = "Peekey uses the camera to scan 2FA QR codes. Frames are processed on this Mac only and are never saved or uploaded.";
+"NSHumanReadableCopyright" = "Peekey — peek at your 2FA codes with one keystroke.";

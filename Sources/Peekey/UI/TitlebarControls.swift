@@ -11,18 +11,18 @@ struct TitlebarControls: View {
 
     var body: some View {
         HStack(spacing: 2) {
-            TitlebarIconButton(symbol: "gearshape", label: "设置 (⌘,)") { model.openSettings() }
+            TitlebarIconButton(symbol: "gearshape", label: L("Settings (⌘,)", "设置 (⌘,)")) { model.openSettings() }
                 .opacity(showGear ? 1 : 0)
                 .allowsHitTesting(showGear)
                 .accessibilityHidden(!showGear)
 
             Menu {
-                Button { model.scanScreen() } label: { Label("扫描屏幕二维码", systemImage: "qrcode.viewfinder") }
-                Button { model.importImageFile() } label: { Label("从图片导入…", systemImage: "photo") }
-                Button { model.startCamera() } label: { Label("使用摄像头扫描", systemImage: "camera") }
+                Button { model.scanScreen() } label: { Label(L("Scan QR Code on Screen", "扫描屏幕二维码"), systemImage: "qrcode.viewfinder") }
+                Button { model.importImageFile() } label: { Label(L("Import from Image…", "从图片导入…"), systemImage: "photo") }
+                Button { model.startCamera() } label: { Label(L("Scan with Camera", "使用摄像头扫描"), systemImage: "camera") }
                 Divider()
-                Button { model.addFromClipboard() } label: { Label("从剪贴板添加", systemImage: "doc.on.clipboard") }
-                Button { model.newManual() } label: { Label("手动输入…", systemImage: "keyboard") }
+                Button { model.addFromClipboard() } label: { Label(L("Add from Clipboard", "从剪贴板添加"), systemImage: "doc.on.clipboard") }
+                Button { model.newManual() } label: { Label(L("Enter Manually…", "手动输入…"), systemImage: "keyboard") }
             } label: {
                 TitlebarIconLabel(symbol: "plus", emphasized: true)
             }
@@ -30,8 +30,8 @@ struct TitlebarControls: View {
             .buttonStyle(.plain)
             .menuIndicator(.hidden)
             .fixedSize()
-            .help("添加账户")
-            .accessibilityLabel("添加账户")
+            .help(L("Add Account", "添加账户"))
+            .accessibilityLabel(L("Add Account", "添加账户"))
         }
         .padding(.trailing, 10)
         .frame(height: 28)

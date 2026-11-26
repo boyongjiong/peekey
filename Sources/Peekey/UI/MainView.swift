@@ -39,21 +39,21 @@ struct MainView: View {
             if info.showsScreenRecordingSettings {
                 return Alert(
                     title: Text(info.title), message: Text(info.message),
-                    primaryButton: .default(Text("打开系统设置")) { model.openScreenRecordingSettings() },
-                    secondaryButton: .cancel(Text("稍后"))
+                    primaryButton: .default(Text(L("Open System Settings", "打开系统设置"))) { model.openScreenRecordingSettings() },
+                    secondaryButton: .cancel(Text(L("Later", "稍后")))
                 )
             }
-            return Alert(title: Text(info.title), message: Text(info.message), dismissButton: .default(Text("好")))
+            return Alert(title: Text(info.title), message: Text(info.message), dismissButton: .default(Text(L("OK", "好"))))
         }
         .confirmationDialog(
-            "删除 \(model.pendingDelete?.displayTitle ?? "")？",
+            L("Delete \(model.pendingDelete?.displayTitle ?? "")?", "删除 \(model.pendingDelete?.displayTitle ?? "")？"),
             isPresented: Binding(get: { model.pendingDelete != nil }, set: { if !$0 { model.pendingDelete = nil } }),
             titleVisibility: .visible
         ) {
-            Button("删除", role: .destructive) { model.confirmDelete() }
-            Button("取消", role: .cancel) { model.pendingDelete = nil }
+            Button(L("Delete", "删除"), role: .destructive) { model.confirmDelete() }
+            Button(L("Cancel", "取消"), role: .cancel) { model.pendingDelete = nil }
         } message: {
-            Text("删除后将无法再生成该账户的验证码。请确认你已在对应网站关闭两步验证或有其他备份。")
+            Text(L("You won't be able to generate codes for this account anymore. Make sure you've disabled 2FA on the site or have another backup.", "删除后将无法再生成该账户的验证码。请确认你已在对应网站关闭两步验证或有其他备份。"))
         }
         .onChange(of: model.focusToken) { searchFocused = !store.accounts.isEmpty }
         .onChange(of: model.search) { model.selectedID = nil }
@@ -66,16 +66,16 @@ struct MainView: View {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 13))
                 .foregroundStyle(.secondary)
-            TextField("搜索", text: $model.search)
+            TextField(L("Search", "搜索"), text: $model.search)
                 .textFieldStyle(.plain)
                 .focused($searchFocused)
-                .accessibilityLabel("搜索账户")
+                .accessibilityLabel(L("Search accounts", "搜索账户"))
             if !model.search.isEmpty {
                 Button { model.search = "" } label: {
                     Image(systemName: "xmark.circle.fill").foregroundStyle(.tertiary)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("清除搜索")
+                .accessibilityLabel(L("Clear search", "清除搜索"))
             }
         }
         .font(.system(size: 14))
@@ -100,9 +100,9 @@ struct MainView: View {
             VStack(spacing: 10) {
                 Spacer()
                 Image(systemName: "exclamationmark.lock").font(.system(size: 40, weight: .light)).foregroundStyle(.secondary)
-                Text("无法读取钥匙串").font(.headline)
+                Text(L("Can't Read Keychain", "无法读取钥匙串")).font(.headline)
                 Text(error).font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
-                Button("重试") { store.load() }.padding(.top, 6)
+                Button(L("Retry", "重试")) { store.load() }.padding(.top, 6)
                 Spacer()
             }
             .padding(.horizontal, 28)
@@ -112,8 +112,8 @@ struct MainView: View {
             VStack(spacing: 8) {
                 Spacer()
                 Image(systemName: "magnifyingglass").font(.system(size: 32, weight: .light)).foregroundStyle(.secondary)
-                Text("没有匹配“\(model.search)”的账户").font(.headline)
-                Text("按 Esc 清除搜索").font(.subheadline).foregroundStyle(.secondary)
+                Text(L("No accounts match “\(model.search)”", "没有匹配“\(model.search)”的账户")).font(.headline)
+                Text(L("Press Esc to clear", "按 Esc 清除搜索")).font(.subheadline).foregroundStyle(.secondary)
                 Spacer()
                 Spacer()
             }
@@ -154,24 +154,24 @@ struct MainView: View {
 
     @ViewBuilder
     private func contextMenu(for account: Account) -> some View {
-        Button("复制验证码") { model.copy(account) }
-        Button("编辑…") { model.edit(account) }
-        Menu("颜色") {
-            Button("自动") { model.setColor(nil, for: account) }
+        Button(L("Copy Code", "复制验证码")) { model.copy(account) }
+        Button(L("Edit…", "编辑…")) { model.edit(account) }
+        Menu(L("Color", "颜色")) {
+            Button(L("Automatic", "自动")) { model.setColor(nil, for: account) }
             Divider()
             ForEach(Palette.all) { p in
                 Button(p.name) { model.setColor(p.key, for: account) }
             }
         }
         Divider()
-        Button("上移") { model.store.move(account.id, by: -1) }
+        Button(L("Move Up", "上移")) { model.store.move(account.id, by: -1) }
             .disabled(model.store.accounts.first?.id == account.id)
-        Button("下移") { model.store.move(account.id, by: 1) }
+        Button(L("Move Down", "下移")) { model.store.move(account.id, by: 1) }
             .disabled(model.store.accounts.last?.id == account.id)
         Divider()
-        Button("复制 otpauth 链接（含密钥）") { model.copyLink(account) }
+        Button(L("Copy otpauth Link (includes secret)", "复制 otpauth 链接（含密钥）")) { model.copyLink(account) }
         Divider()
-        Button("删除…", role: .destructive) { model.pendingDelete = account }
+        Button(L("Delete…", "删除…"), role: .destructive) { model.pendingDelete = account }
     }
 
     // MARK: - Overlays
@@ -196,7 +196,7 @@ struct MainView: View {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .strokeBorder(Color.accentColor, style: StrokeStyle(lineWidth: 2, dash: [8, 6]))
                 .background(Color.accentColor.opacity(0.08), in: RoundedRectangle(cornerRadius: 16))
-                .overlay(Label("松开以识别二维码", systemImage: "qrcode.viewfinder").font(.headline))
+                .overlay(Label(L("Drop to scan QR code", "松开以识别二维码"), systemImage: "qrcode.viewfinder").font(.headline))
                 .padding(10)
                 .allowsHitTesting(false)
         }
@@ -224,14 +224,14 @@ private struct EmptyStateView: View {
                         .contentTransition(.symbolEffect(.replace))
                 }
                 VStack(spacing: 6) {
-                    Text(dropTargeted ? "松开以识别二维码" : "添加第一个验证码")
+                    Text(dropTargeted ? L("Drop to scan QR code", "松开以识别二维码") : L("Add your first code", "添加第一个验证码"))
                         .font(.system(size: 17, weight: .semibold))
-                    Text("框选网页上的 2FA 二维码即可添加")
+                    Text(L("Select a 2FA QR code on screen to add it", "框选网页上的 2FA 二维码即可添加"))
                         .font(.system(size: 13))
                         .foregroundStyle(.secondary)
                 }
                 Button { model.scanScreen() } label: {
-                    Label("扫描屏幕二维码", systemImage: "viewfinder")
+                    Label(L("Scan QR Code on Screen", "扫描屏幕二维码"), systemImage: "viewfinder")
                         .frame(minWidth: 150)
                 }
                 .buttonStyle(.borderedProminent)
@@ -239,13 +239,13 @@ private struct EmptyStateView: View {
                 .padding(.top, 4)
 
                 HStack(spacing: 6) {
-                    LinkButton("从图片导入") { model.importImageFile() }
+                    LinkButton(L("Import image", "从图片导入")) { model.importImageFile() }
                     Text("·").foregroundStyle(.tertiary)
-                    LinkButton("手动输入") { model.newManual() }
+                    LinkButton(L("Enter manually", "手动输入")) { model.newManual() }
                 }
                 .font(.system(size: 13))
                 Spacer(minLength: 0)
-                Text("也可以把二维码图片拖到这里")
+                Text(L("Or drop a QR code image here", "也可以把二维码图片拖到这里"))
                     .font(.system(size: 12))
                     .foregroundStyle(.secondary)
                     .padding(.bottom, 14)
@@ -269,7 +269,7 @@ private struct EmptyStateView: View {
             if let hotKey {
                 HStack(spacing: 6) {
                     KeyCap(hotKey.display)
-                    Text("在任何地方唤醒 Peekey")
+                    Text(L("summons Peekey from anywhere", "在任何地方唤醒 Peekey"))
                 }
                 .font(.system(size: 12))
                 .foregroundStyle(.secondary)

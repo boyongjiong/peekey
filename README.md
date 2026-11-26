@@ -7,6 +7,7 @@
 - **显示模式**：仅菜单栏 / 仅 Dock / 两者 / 都不显示
 - **全局快捷键**（默认 `⌥⌘2`）一键显示 / 隐藏，不需要辅助功能权限
 - 密钥只存在 macOS 钥匙串，不联网
+- 界面英文 / 简体中文，设置中即时切换（默认英文）
 - Universal：Apple Silicon + Intel，macOS 14+
 
 ## 构建
@@ -24,6 +25,12 @@ PEEKEY_DEMO=1 build/Peekey.app/Contents/MacOS/Peekey
 ```
 
 正式分发：`SIGN_IDENTITY="Developer ID Application: …" ./scripts/build-app.sh`，然后 notarize。
+
+## 多语言
+
+文案以 `L("English", "中文")` 成对写在调用处（`Sources/Peekey/Localization.swift`），不会漏翻；
+语言切换时 SwiftUI 根视图通过 `.id(language)` 重建，AppKit 菜单重新生成。
+系统权限弹窗文案在 `Resources/*.lproj/InfoPlist.strings`，跟随系统语言。
 
 ## 快捷键
 

@@ -9,11 +9,11 @@ public enum OTPImportError: Error, Equatable, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .notOTPAuth: return "不是有效的 2FA 二维码（需要 otpauth:// 链接）"
-        case .unsupportedType(let t): return "暂不支持 \(t.uppercased()) 类型，仅支持 TOTP"
-        case .missingSecret: return "链接中缺少密钥（secret）"
-        case .invalidSecret: return "密钥格式无效（需要 Base32）"
-        case .invalidMigrationPayload: return "无法解析 Google Authenticator 导出数据"
+        case .notOTPAuth: return "Not a valid 2FA QR code (otpauth:// link required)"
+        case .unsupportedType(let t): return "\(t.uppercased()) is not supported, only TOTP"
+        case .missingSecret: return "The link is missing a secret"
+        case .invalidSecret: return "Invalid secret (Base32 expected)"
+        case .invalidMigrationPayload: return "Unable to parse Google Authenticator export"
         }
     }
 }
