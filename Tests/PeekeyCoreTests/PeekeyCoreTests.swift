@@ -86,7 +86,7 @@ final class OTPAuthURITests: XCTestCase {
     }
 
     func testBuildRoundTrip() throws {
-        let a = Account(issuer: "Sumsub - cockpit", name: "a+b@x.cn", secret: "JBSWY3DPEHPK3PXP", algorithm: .sha512, digits: 8, period: 45)
+        let a = Account(issuer: "Example Co - console", name: "a+b@example.com", secret: "JBSWY3DPEHPK3PXP", algorithm: .sha512, digits: 8, period: 45)
         let b = try OTPAuthURI.parse(OTPAuthURI.build(a))
         XCTAssertEqual(b.issuer, a.issuer)
         XCTAssertEqual(b.name, a.name)

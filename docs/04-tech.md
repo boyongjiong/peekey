@@ -3,7 +3,7 @@
 ## 1. 选型
 
 | 维度 | 选择 | 理由 |
-|---|---|---|
+| --- | --- | --- |
 | 语言 | Swift 6（Swift 5 语言模式） | 原生、体积小、无运行时依赖 |
 | UI | SwiftUI 视图 + AppKit 窗口/状态栏管理 | SwiftUI 写卡片快；Dock/菜单栏/激活策略/窗口定位需要 AppKit 精细控制 |
 | 工程 | Swift Package Manager + `scripts/build-app.sh` 打包 `.app` | 不依赖 Xcode 工程文件，命令行可完整构建；需要时也能用 Xcode 直接打开 `Package.swift` |
@@ -54,9 +54,11 @@ scripts/
 ## 3. 关键实现
 
 ### 3.1 TOTP
+
 `counter = floor(unixTime / period)`，HMAC（CryptoKit `HMAC<Insecure.SHA1>` / `SHA256` / `SHA512`）对 8 字节大端 counter 签名，动态截断取 31 位整数，对 `10^digits` 取模，左侧补零。用 RFC 6238 附录 B 的测试向量做单测。
 
 ### 3.2 存储
+
 - **Secret**：所有账户序列化成 JSON，作为 **一个** generic password 存入登录钥匙串（service = `app.peekey.mac.vault`）。只存一个条目，首次授权只弹一次框。
 - **非敏感偏好**（显示模式、快捷键、开关项）：`UserDefaults`。
 - 不使用 Data Protection Keychain：它需要带 Team ID 的 `keychain-access-groups` entitlement，ad-hoc 签名拿不到。正式分发（Developer ID 签名）后可迁移。
@@ -64,7 +66,7 @@ scripts/
 ### 3.3 显示模式（核心需求）
 
 | 模式 | `NSApp.activationPolicy` | 菜单栏 `NSStatusItem` |
-|---|---|---|
+| --- | --- | --- |
 | 仅菜单栏 | `.accessory` | 显示 |
 | 仅 Dock | `.regular` | 移除 |
 | 菜单栏 + Dock | `.regular` | 显示 |
@@ -78,7 +80,9 @@ scripts/
   3. 设置「都不显示」时强制要求已有快捷键。
 
 ### 3.4 一键显示 / 隐藏
+
 `MainWindowController.toggle(source:)`：
+
 - 窗口可见且 App 在前台 → `orderOut` 隐藏（菜单栏/隐身模式下调用 `NSApp.hide` 把焦点还给上一个 App）
 - 否则 → 定位（菜单栏来源则对齐图标）→ `NSApp.activate()` → `makeKeyAndOrderFront` → 搜索框获取焦点
 - 失焦自动隐藏：监听 `NSWindow.didResignKeyNotification`（弹 sheet / 扫码时暂停）
@@ -86,18 +90,22 @@ scripts/
 窗口：`NSWindow`（titled + closable + miniaturizable + resizable + fullSizeContentView，透明标题栏），关闭按钮只隐藏不退出；`collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]`，在全屏 App 上方也能弹出。
 
 ### 3.5 扫码
+
 - **屏幕框选**：执行 `/usr/sbin/screencapture -i -x <tmp.png>`，复用系统框选 UI，再用 Vision `VNDetectBarcodesRequest(symbologies: [.qr])` 识别。首次使用系统会请求「屏幕录制」权限。
 - **图片 / 拖拽 / 剪贴板**：`NSImage` → `CGImage` → Vision。
 - **摄像头**：`AVCaptureSession` + `AVCaptureVideoDataOutput`，每 ~0.3s 抽一帧交给 Vision，识别到 `otpauth` 即停止。需要 `NSCameraUsageDescription` 和 `com.apple.security.device.camera`（如果开启沙盒）。
 - 解析结果：`otpauth://totp/...` → 单个账户（弹表单确认）；`otpauth-migration://offline?data=...` → 批量导入。
 
 ### 3.6 全局快捷键
+
 Carbon `RegisterEventHotKey` + `InstallEventHandler`。快捷键以 `(keyCode, carbonModifiers)` 存 UserDefaults；录制器用 `NSEvent.addLocalMonitorForEvents(.keyDown)` 捕获，要求至少包含 ⌘/⌥/⌃ 之一。
 
 ### 3.7 剪贴板清除
+
 复制后记录 `NSPasteboard.changeCount`，N 秒后若 `changeCount` 未变（用户没复制别的）才清空。
 
 ### 3.8 开机自启
+
 `SMAppService.mainApp.register()/unregister()`。需要 App 位于 `/Applications` 或已签名的 bundle 中才生效。
 
 ## 4. 安全
@@ -121,6 +129,6 @@ open build/Peekey.app
 ## 6. 测试计划
 
 | 层 | 内容 |
-|---|---|
+| --- | --- |
 | 单元测试 | RFC 6238 SHA1/256/512 向量；Base32 带/不带补位、小写、空格；otpauth URI 各字段与 URL 编码；迁移 payload 解码 |
 | 手工测试 | 四种显示模式切换；快捷键在其他 App 前台时唤醒/隐藏；全屏 Space 上唤醒；三种扫码方式；钥匙串重启后数据仍在 |
